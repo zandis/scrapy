@@ -8,71 +8,79 @@ A Scrapy-based application to scrape medical content from:
 
 ```
 medical_scraper/
-├── scrapy.cfg                 # Scrapy configuration
-├── output/                    # Scraped content output
-│   ├── md_cafe/              # Content from md.cafe
-│   │   ├── html/             # Raw HTML files
-│   │   ├── text/             # Plain text content
-│   │   └── json/             # Metadata JSON files
-│   └── msdmanuals/           # Content from MSD Manuals
+├── scrapy.cfg                  # Scrapy configuration
+├── run_scraper.py              # Convenience run script
+├── requirements.txt            # Python dependencies
+├── output/                     # Scraped content output
+│   ├── md_cafe/               # Content from md.cafe
+│   │   ├── html/              # Raw HTML files
+│   │   ├── text/              # Plain text content
+│   │   └── json/              # Metadata JSON files
+│   └── msdmanuals/            # Content from MSD Manuals
 │       ├── html/
 │       ├── text/
 │       └── json/
 └── medical_scraper/
     ├── __init__.py
-    ├── items.py              # Item definitions
-    ├── middlewares.py        # Custom middlewares (User-Agent rotation, retry)
-    ├── pipelines.py          # Content saving pipeline
-    ├── settings.py           # Scrapy settings
+    ├── items.py               # Item definitions
+    ├── middlewares.py         # Custom middlewares
+    ├── pipelines.py           # Content saving pipeline
+    ├── settings.py            # Scrapy settings
     └── spiders/
         ├── __init__.py
-        ├── mdcafe_spider.py      # Spider for md.cafe
-        └── msdmanuals_spider.py  # Spider for MSD Manuals Professional
+        ├── mdcafe_spider.py           # Standard spider for md.cafe
+        ├── mdcafe_playwright_spider.py # Playwright spider for md.cafe
+        ├── msdmanuals_spider.py        # Standard spider for MSD Manuals
+        ├── msdmanuals_playwright_spider.py # Playwright spider for MSD Manuals
+        └── test_spider.py              # Test spider for verification
 ```
 
 ## Installation
 
 ```bash
-# From the repository root
-pip install -e .
+cd medical_scraper
 
-# Or install dependencies directly
-pip install scrapy
+# Install basic dependencies
+pip install -r requirements.txt
+
+# For JavaScript-heavy sites, also install Playwright
+pip install scrapy-playwright
+playwright install chromium
 ```
 
-## Usage
-
-### Run Individual Spiders
+## Quick Start
 
 ```bash
 cd medical_scraper
 
+# Test the pipeline works (generates sample data)
+python run_scraper.py --test
+
 # Scrape md.cafe
-scrapy crawl mdcafe
+python run_scraper.py --site mdcafe
 
 # Scrape MSD Manuals Professional
-scrapy crawl msdmanuals
+python run_scraper.py --site msdmanuals
+
+# Scrape both sites
+python run_scraper.py --site all
+
+# Use Playwright for JavaScript rendering
+python run_scraper.py --site mdcafe --playwright
+
+# Verbose mode
+python run_scraper.py --site msdmanuals --verbose
 ```
 
-### Run with Output Logging
+## Available Spiders
 
-```bash
-# With verbose output
-scrapy crawl mdcafe -L DEBUG
-
-# Save logs to file
-scrapy crawl msdmanuals --logfile=scrape.log
-```
-
-### Export to Additional Formats
-
-```bash
-# Export items to JSON Lines
-scrapy crawl mdcafe -o items.jsonl
-
-# Export to CSV
-scrapy crawl msdmanuals -o items.csv
-```
+| Spider | Command | Description |
+|--------|---------|-------------|
+| `test` | `scrapy crawl test` | Test spider - generates sample items to verify pipeline |
+| `mdcafe` | `scrapy crawl mdcafe` | Standard spider for md.cafe |
+| `mdcafe_pw` | `scrapy crawl mdcafe_pw` | Playwright spider for md.cafe (JS support) |
+| `msdmanuals` | `scrapy crawl msdmanuals` | Standard spider for MSD Manuals |
+| `msdmanuals_pw` | `scrapy crawl msdmanuals_pw` | Playwright spider for MSD Manuals (JS support) |
 
 ## Configuration
 
@@ -80,70 +88,112 @@ Key settings in `settings.py`:
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `DOWNLOAD_DELAY` | 2 | Seconds between requests |
+| `DOWNLOAD_DELAY` | 2-4 | Seconds between requests |
 | `CONCURRENT_REQUESTS` | 4 | Maximum concurrent requests |
 | `ROBOTSTXT_OBEY` | True | Respect robots.txt |
 | `DEPTH_LIMIT` | 5 | Maximum crawl depth |
 | `AUTOTHROTTLE_ENABLED` | True | Auto-adjust request rate |
+| `HTTPCACHE_ENABLED` | True | Cache responses (24h) |
 
 ## Output
 
-Each scraped page generates three files:
+Each scraped page generates three files in separate folders:
 
-1. **HTML** (`output/<source>/html/<filename>.html`): Raw HTML content
-2. **Text** (`output/<source>/text/<filename>.txt`): Cleaned plain text with metadata
-3. **JSON** (`output/<source>/json/<filename>.json`): Structured metadata
+### Directory Structure
+```
+output/
+├── md_cafe/
+│   ├── html/       # Raw HTML content
+│   ├── text/       # Cleaned plain text with metadata header
+│   └── json/       # Structured metadata
+└── msdmanuals/
+    ├── html/
+    ├── text/
+    └── json/
+```
 
-### JSON Metadata Structure
+### Text File Format
+```
+Title: Heart Failure - Diagnosis and Treatment
+================================================================================
+Source URL: https://md.cafe/cardiology/heart-failure
+Category: Cardiology
+Subcategory: Heart Conditions
+Path: Cardiology > Heart Conditions > Heart Failure
+Last Updated: 2024-01-15
 
+--------------------------------------------------------------------------------
+
+Heart failure is a chronic condition where the heart doesn't pump blood...
+```
+
+### JSON Metadata
 ```json
 {
-  "url": "https://example.com/page",
-  "title": "Page Title",
+  "url": "https://md.cafe/cardiology/heart-failure",
+  "title": "Heart Failure - Diagnosis and Treatment",
   "source": "md_cafe",
-  "category": "Category Name",
-  "subcategory": "Subcategory",
-  "breadcrumbs": ["Category", "Subcategory", "Topic"],
+  "category": "Cardiology",
+  "subcategory": "Heart Conditions",
+  "breadcrumbs": ["Cardiology", "Heart Conditions", "Heart Failure"],
   "last_updated": "2024-01-15",
   "scraped_at": "2024-01-20T10:30:00Z",
-  "filename": "page-title_12345678"
+  "filename": "Heart-Failure-Diagnosis-and-Treatment_84664295"
 }
 ```
 
 ## Features
 
-- **User-Agent Rotation**: Rotates through realistic browser user agents
-- **Auto-Throttling**: Automatically adjusts request rate based on server response
-- **HTTP Caching**: Caches responses to avoid redundant requests
-- **Retry Logic**: Retries failed requests with exponential backoff
-- **Robots.txt Compliance**: Respects website crawling rules
+- **User-Agent Rotation**: Rotates through 9 realistic browser user agents
+- **Auto-Throttling**: Adjusts request rate based on server response time
+- **HTTP Caching**: 24-hour cache to avoid redundant requests
+- **Retry Logic**: Automatic retries with backoff on failures
+- **Robots.txt Compliance**: Respects crawling rules
 - **Duplicate Filtering**: Avoids scraping the same URL twice
-
-## Ethical Considerations
-
-This scraper is configured to be respectful:
-- Obeys robots.txt directives
-- Uses reasonable delays between requests
-- Identifies itself with a realistic user agent
-- Auto-throttles based on server load
-
-Always ensure you have permission to scrape target websites and comply with their Terms of Service.
+- **Playwright Support**: Optional JavaScript rendering for dynamic sites
+- **Three Output Formats**: HTML, plain text, and JSON metadata
 
 ## Troubleshooting
 
 ### 403 Forbidden Errors
 
-The sites may block automated requests. Try:
-- Increasing `DOWNLOAD_DELAY`
-- Reducing `CONCURRENT_REQUESTS`
-- Adding more delay between requests
+If sites block requests:
+
+1. **Use Playwright spiders** for better browser emulation:
+   ```bash
+   python run_scraper.py --site mdcafe --playwright
+   ```
+
+2. **Increase delays** in `settings.py`:
+   ```python
+   DOWNLOAD_DELAY = 5
+   CONCURRENT_REQUESTS = 1
+   ```
+
+3. **Check robots.txt** - the site may explicitly forbid scraping
+
+### Proxy/Network Issues
+
+If you're behind a corporate proxy that blocks certain sites:
+- Run the scraper from a network without restrictions
+- Use a VPN if permitted
+- The test spider (`--test`) works without network access
 
 ### No Content Extracted
 
-Check the spider logs for:
-- Redirects to login pages
-- JavaScript-rendered content (may need Splash/Playwright)
-- Changed page structure (update CSS selectors)
+- Check spider logs for redirect/login page detection
+- Verify the site structure hasn't changed
+- Try Playwright spiders for JavaScript-rendered content
+
+## Ethical Usage
+
+This scraper is configured responsibly:
+- Obeys robots.txt directives
+- Uses 2-4 second delays between requests
+- Auto-throttles based on server load
+- Identifies with realistic user agents
+
+**Always ensure you have permission to scrape target websites and comply with their Terms of Service.**
 
 ## License
 

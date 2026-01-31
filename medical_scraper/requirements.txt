@@ -1,0 +1,8 @@
+# Core dependencies
+scrapy>=2.11.0
+
+# Optional: For JavaScript-rendered pages
+scrapy-playwright>=0.0.40
+
+# Note: After installing scrapy-playwright, run:
+#   playwright install chromium
