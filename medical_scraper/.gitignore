@@ -2,8 +2,8 @@
 .scrapy/
 httpcache/
 
-# Output directories (generated content)
-output/
+# Output directories - uncomment to ignore scraped content
+# output/
 
 # Python
 __pycache__/
