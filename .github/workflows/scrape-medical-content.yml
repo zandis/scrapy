@@ -1,13 +1,36 @@
 name: Scrape Medical Content
 
 on:
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      site:
+        description: 'Site to scrape'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - mdcafe
+          - msdmanuals
+      max_pages:
+        description: 'Maximum pages to scrape per site'
+        required: false
+        default: '100'
+        type: string
+      use_playwright:
+        description: 'Use Playwright for JavaScript rendering'
+        required: false
+        default: true
+        type: boolean
+
+  # Uncomment to run on schedule
   # schedule:
-  #   - cron: '0 0 * * 0'  # Weekly on Sunday (uncomment to enable)
+  #   - cron: '0 0 * * 0'  # Weekly on Sunday at midnight UTC
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -17,37 +40,94 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
-      - name: Install dependencies
+      - name: Install Scrapy
+        run: pip install scrapy
+
+      - name: Install Playwright (if enabled)
+        if: ${{ inputs.use_playwright }}
         run: |
-          pip install scrapy
           pip install scrapy-playwright
           playwright install chromium
           playwright install-deps
 
-      - name: Run md.cafe scraper
+      - name: Create output directories
+        run: |
+          mkdir -p medical_scraper/output/md_cafe/{html,text,json}
+          mkdir -p medical_scraper/output/msdmanuals/{html,text,json}
+
+      - name: Scrape md.cafe
+        if: ${{ inputs.site == 'all' || inputs.site == 'mdcafe' }}
         working-directory: medical_scraper
         run: |
-          scrapy crawl mdcafe_pw -s LOG_LEVEL=INFO
+          SPIDER=${{ inputs.use_playwright && 'mdcafe_pw' || 'mdcafe' }}
+          echo "Running spider: $SPIDER"
+          scrapy crawl $SPIDER \
+            -s LOG_LEVEL=INFO \
+            -s CLOSESPIDER_PAGECOUNT=${{ inputs.max_pages }}
         continue-on-error: true
 
-      - name: Run MSD Manuals scraper
+      - name: Scrape MSD Manuals
+        if: ${{ inputs.site == 'all' || inputs.site == 'msdmanuals' }}
         working-directory: medical_scraper
         run: |
-          scrapy crawl msdmanuals_pw -s LOG_LEVEL=INFO
+          SPIDER=${{ inputs.use_playwright && 'msdmanuals_pw' || 'msdmanuals' }}
+          echo "Running spider: $SPIDER"
+          scrapy crawl $SPIDER \
+            -s LOG_LEVEL=INFO \
+            -s CLOSESPIDER_PAGECOUNT=${{ inputs.max_pages }}
         continue-on-error: true
+
+      - name: List scraped files
+        run: |
+          echo "=== Scraped Content Summary ==="
+          echo ""
+          echo "md.cafe files:"
+          find medical_scraper/output/md_cafe -type f | wc -l
+          echo ""
+          echo "MSD Manuals files:"
+          find medical_scraper/output/msdmanuals -type f | wc -l
+          echo ""
+          echo "=== File listing ==="
+          find medical_scraper/output -type f -name "*.json" | head -20
 
       - name: Commit scraped content
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-          # Remove output from gitignore temporarily
-          sed -i '/^output\//d' medical_scraper/.gitignore
+          # Ensure output is not in gitignore
+          sed -i 's/^output\//#output\//' medical_scraper/.gitignore 2>/dev/null || true
 
-          git add medical_scraper/output/
+          git add medical_scraper/output/ -f
           git add medical_scraper/.gitignore
 
+          # Create commit message with summary
+          MDCAFE_COUNT=$(find medical_scraper/output/md_cafe -type f -name "*.json" 2>/dev/null | wc -l)
+          MSD_COUNT=$(find medical_scraper/output/msdmanuals -type f -name "*.json" 2>/dev/null | wc -l)
+
+          COMMIT_MSG="Update scraped medical content
+
+          - md.cafe: $MDCAFE_COUNT pages
+          - MSD Manuals: $MSD_COUNT pages
+
+          Triggered by: ${{ github.actor }}
+          Site: ${{ inputs.site }}
+          Max pages: ${{ inputs.max_pages }}"
+
           # Only commit if there are changes
-          git diff --staged --quiet || git commit -m "Update scraped medical content [automated]"
-          git push
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "$COMMIT_MSG"
+            git push
+            echo "Changes committed and pushed!"
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraped-content
+          path: medical_scraper/output/
+          retention-days: 30
