@@ -1,0 +1,34 @@
+Title: Heart Failure - Diagnosis and Treatment
+================================================================================
+Source URL: https://md.cafe/cardiology/heart-failure
+Category: Cardiology
+Subcategory: Heart Conditions
+Path: Cardiology > Heart Conditions > Heart Failure
+Last Updated: 2024-01-15
+
+--------------------------------------------------------------------------------
+
+Heart failure is a chronic condition where the heart doesn't pump blood as well as it should.
+
+Symptoms:
+- Shortness of breath during activity or when lying down
+- Fatigue and weakness
+- Swelling in legs, ankles, and feet
+- Rapid or irregular heartbeat
+- Reduced ability to exercise
+- Persistent cough or wheezing
+
+Diagnosis:
+Heart failure is diagnosed through physical examination, blood tests,
+electrocardiogram (ECG), echocardiogram, and stress tests.
+
+Treatment:
+Treatment typically includes medications (ACE inhibitors, beta-blockers,
+diuretics), lifestyle changes, and in some cases, devices or surgery.
+
+Prevention:
+- Control high blood pressure
+- Maintain healthy weight
+- Exercise regularly
+- Don't smoke
+- Limit alcohol and sodium intake

@@ -1,0 +1,39 @@
+Title: Asthma - Pulmonary Disorders
+================================================================================
+Source URL: https://www.msdmanuals.com/professional/pulmonary-disorders/asthma
+Category: Pulmonary Disorders
+Subcategory: Obstructive Airway Diseases
+Path: Professional > Pulmonary Disorders > Obstructive Airway Diseases > Asthma
+Last Updated: 2024-02-01
+
+--------------------------------------------------------------------------------
+
+Asthma is a disease of diffuse airway inflammation caused by a variety of
+triggering stimuli resulting in partially or completely reversible bronchoconstriction.
+
+Etiology:
+Asthma is a multifactorial disease. Genetic factors, allergies, and environmental
+exposures all play roles in its development.
+
+Pathophysiology:
+The hallmarks of asthma are:
+- Bronchoconstriction
+- Airway edema
+- Mucus hypersecretion
+- Airway hyperresponsiveness
+
+Symptoms and Signs:
+- Wheezing
+- Dyspnea
+- Chest tightness
+- Cough (often worse at night)
+
+Diagnosis:
+- Pulmonary function tests showing reversible obstruction
+- Peak flow monitoring
+- Bronchoprovocation testing when diagnosis uncertain
+
+Treatment:
+- Quick-relief medications: Short-acting beta-agonists
+- Long-term control: Inhaled corticosteroids, LABAs, leukotriene modifiers
+- Biologic therapies for severe asthma

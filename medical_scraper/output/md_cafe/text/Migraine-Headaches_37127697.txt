@@ -1,0 +1,18 @@
+Title: Migraine Headaches
+================================================================================
+Source URL: https://md.cafe/neurology/migraine
+Category: Neurology
+Subcategory: Headache Disorders
+Path: Neurology > Headache Disorders > Migraine
+
+--------------------------------------------------------------------------------
+
+Migraine is a neurological condition characterized by recurrent headaches
+that are moderate to severe. Typically, they affect one half of the head,
+are pulsating in nature, and can last from 2 to 72 hours.
+
+Associated symptoms may include nausea, vomiting, and sensitivity to light,
+sound, or smell. The pain is generally made worse by physical activity.
+
+Treatment includes both acute therapy (triptans, NSAIDs) and preventive
+measures (beta-blockers, anticonvulsants, CGRP inhibitors).

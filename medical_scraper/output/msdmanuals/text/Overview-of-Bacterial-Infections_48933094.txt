@@ -1,0 +1,26 @@
+Title: Overview of Bacterial Infections
+================================================================================
+Source URL: https://www.msdmanuals.com/professional/infectious-diseases/bacterial-infections
+Category: Infectious Diseases
+Subcategory: Bacterial Infections
+Path: Professional > Infectious Diseases > Bacterial Infections
+
+--------------------------------------------------------------------------------
+
+Bacteria are microscopic, single-celled organisms. They are among the
+earliest known life forms on Earth. There are thousands of different
+kinds of bacteria, and they live in every conceivable environment.
+
+Pathogenic bacteria cause disease through various mechanisms including:
+- Toxin production
+- Direct tissue invasion
+- Immune-mediated damage
+
+Common bacterial infections include:
+- Streptococcal infections
+- Staphylococcal infections
+- E. coli infections
+- Pneumococcal infections
+
+Treatment typically involves antibiotics selected based on culture
+and sensitivity testing when possible.
